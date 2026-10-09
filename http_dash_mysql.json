@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "http-request-logs",
+    "title": "HTTP Request Logs",
+    "tags": ["http", "imperial"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "10s",
+    "time": { "from": "now-1h", "to": "now" },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate (per minute)",
+        "type": "timeseries",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [{
+          "rawSql": "SELECT UNIX_TIMESTAMP(timestamp) AS time_sec, COUNT(*) AS value FROM http_request_logs WHERE $__timeFilter(timestamp) GROUP BY UNIX_TIMESTAMP(timestamp) DIV 60 ORDER BY time_sec ASC",
+          "format": "time_series", "refId": "A"
+        }]
+      },
+      {
+        "id": 2,
+        "title": "Status Code Distribution",
+        "type": "piechart",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [{
+          "rawSql": "SELECT status_code, COUNT(*) AS queries FROM http_request_logs WHERE $__timeFilter(timestamp) GROUP BY status_code",
+          "format": "table", "refId": "A"
+        }]
+      },
+      {
+        "id": 3,
+        "title": "Top Paths",
+        "type": "barchart",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [{
+          "rawSql": "SELECT path, COUNT(*) AS hits FROM http_request_logs WHERE $__timeFilter(timestamp) GROUP BY path ORDER BY hits DESC LIMIT 10",
+          "format": "table", "refId": "A"
+        }]
+      },
+      {
+        "id": 4,
+        "title": "Total Requests (last 1h)",
+        "type": "stat",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
+        "targets": [{
+          "rawSql": "SELECT COUNT(*) AS total FROM http_request_logs WHERE $__timeFilter(timestamp)",
+          "format": "table", "refId": "A"
+        }]
+      },
+      {
+        "id": 5,
+        "title": "Error Rate (%)",
+        "type": "stat",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+        "targets": [{
+          "rawSql": "SELECT ROUND(100.0 * SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0), 2) AS errors FROM http_request_logs WHERE $__timeFilter(timestamp)",
+          "format": "table", "refId": "A"
+        }]
+      },
+      {
+        "id": 6,
+        "title": "Recent Requests",
+        "type": "table",
+        "datasource": { "type": "mysql", "uid": "dfspb6k71nmrka" },
+        "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+        "targets": [{
+          "rawSql": "SELECT timestamp AS \"Time\", client_ip AS \"Client\", method AS \"M\", path AS \"Path\", status_code AS \"Status\", ROUND(latency_ms,2) AS \"ms\", response_bytes AS \"Bytes\" FROM http_request_logs ORDER BY timestamp DESC LIMIT 50",
+          "format": "table", "refId": "A"
+        }]
+      }
+    ]
+  },
+  "overwrite": true
+}

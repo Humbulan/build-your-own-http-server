@@ -1,0 +1,60 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "http-server-prom",
+    "title": "HTTP Server (Prometheus)",
+    "tags": ["http", "prometheus", "imperial"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "refresh": "5s",
+    "time": { "from": "now-15m", "to": "now" },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate (RPS) by Status",
+        "type": "timeseries",
+        "datasource": { "type": "prometheus", "uid": "afsl3hnnbm328c" },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "targets": [{
+          "expr": "sum(rate(http_requests_total[1m])) by (status)",
+          "legendFormat": "{{status}}", "refId": "A"
+        }]
+      },
+      {
+        "id": 2,
+        "title": "Top Paths (RPS)",
+        "type": "timeseries",
+        "datasource": { "type": "prometheus", "uid": "afsl3hnnbm328c" },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "targets": [{
+          "expr": "sum(rate(http_requests_total[1m])) by (path)",
+          "legendFormat": "{{path}}", "refId": "A"
+        }]
+      },
+      {
+        "id": 3,
+        "title": "Latency p50/p95/p99 (s)",
+        "type": "timeseries",
+        "datasource": { "type": "prometheus", "uid": "afsl3hnnbm328c" },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          { "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50", "refId": "A" },
+          { "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "B" },
+          { "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99", "refId": "C" }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Total Requests by Status",
+        "type": "stat",
+        "datasource": { "type": "prometheus", "uid": "afsl3hnnbm328c" },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [{
+          "expr": "sum(http_requests_total) by (status)",
+          "legendFormat": "{{status}}", "refId": "A", "instant": true
+        }]
+      }
+    ]
+  },
+  "overwrite": true
+}

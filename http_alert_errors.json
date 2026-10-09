@@ -1,0 +1,43 @@
+{
+  "title": "HTTP Error Rate High (5xx > 5%)",
+  "ruleGroup": "http-alerts",
+  "folderUID": "dfzwug6zghhq8b",
+  "condition": "B",
+  "for": "2m",
+  "noDataState": "NoData",
+  "execErrState": "Error",
+  "annotations": {
+    "summary": "HTTP 5xx error rate exceeded 5% for 2 minutes",
+    "description": "Check http-server logs on port 4221"
+  },
+  "labels": { "severity": "warning", "service": "http" },
+  "data": [
+    {
+      "refId": "A",
+      "queryType": "",
+      "relativeTimeRange": { "from": 300, "to": 0 },
+      "datasourceUid": "afsl3hnnbm328c",
+      "model": {
+        "expr": "100 * sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m]))",
+        "refId": "A", "instant": true
+      }
+    },
+    {
+      "refId": "B",
+      "queryType": "",
+      "relativeTimeRange": { "from": 300, "to": 0 },
+      "datasourceUid": "__expr__",
+      "model": {
+        "type": "threshold", "refId": "B",
+        "conditions": [{
+          "evaluator": { "params": [5], "type": "gt" },
+          "operator": { "type": "and" },
+          "query": { "params": ["A"] },
+          "reducer": { "type": "last" },
+          "type": "query"
+        }],
+        "expression": "A"
+      }
+    }
+  ]
+}
